@@ -1,0 +1,108 @@
+--Abaixo estara lib da nossa queria UI
+
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+
+local UI = Lib:Create{
+   Theme = "Dark", -- or any other theme
+   Size = UDim2.new(0, 555, 0, 400) -- default
+}
+
+local Main = UI:Tab{
+   Name = "Inicio"
+}
+
+local Divider = Main:Divider{
+   Name = "Inicio shit"
+}
+
+local QuitDivider = Main:Divider{
+   Name = "Sair"
+}
+
+local savedState = nil
+local rollbackEnabled = false
+local scriptEnabled = true
+}
+
+function saveState(character)
+    savedState = {
+        crystals = character.Crystals,
+        traits = {}
+    }
+    for trait, value in pairs(character.PassiveTraits) do
+        savedState.traits[trait] = value
+    end
+    print("Estado salvo.")
+end
+
+function rollbackState(character)
+    if rollbackEnabled and savedState then
+        character.Crystals = savedState.crystals
+        for trait, value in pairs(savedState.traits) do
+            character.PassiveTraits[trait] = value
+        end
+        print("Estado revertido.")
+    else
+        print("Rollback está desativado ou não há estado salvo para reverter.")
+    end
+end
+
+function toggleRollback()
+    rollbackEnabled = not rollbackEnabled
+    updateGui()
+    print("Rollback " .. (rollbackEnabled and "ativado" or "desativado") .. ".")
+end
+
+function onKeyPress(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        scriptEnabled = not scriptEnabled
+        updateGui()
+        print("Script " .. (scriptEnabled and "ativado" or "desativado") .. ".")
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(onKeyPress)
+
+function updateGui()
+    if rollbackEnabled then
+        rollbackLabel.Text = "Rollback: Ativado"
+    else
+        rollbackLabel.Text = "Rollback: Desativado"
+    end
+end
+
+local screenGui = Instance.new("ScreenGui")
+local rollbackLabel = Instance.new("TextLabel")
+
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+rollbackLabel.Parent = screenGui
+
+rollbackLabel.Size = UDim2.new(0, 200, 0, 50)
+rollbackLabel.Position = UDim2.new(0, 10, 0, 10)
+rollbackLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+rollbackLabel.TextColor3 = Color3.new(1, 1, 1)
+rollbackLabel.Text = "Rollback: Desativado"
+
+local character = {
+    Crystals = 100,
+    PassiveTraits = {
+        Strength = 10,
+        Agility = 8,
+        Intelligence = 7
+    }
+}
+
+print("Estado atual dos cristais e traits:", character.Crystals, character.PassiveTraits.Strength, character.PassiveTraits.Agility, character.PassiveTraits.Intelligence)
+
+saveState(character)
+
+character.Crystals = 50
+character.PassiveTraits.Strength = 15
+character.PassiveTraits.Agility = 10
+character.PassiveTraits.Intelligence = 9
+print("Estado modificado:", character.Crystals, character.PassiveTraits.Strength, character.PassiveTraits.Agility, character.PassiveTraits.Intelligence)
+
+toggleRollback()
+
+rollbackState(character)
+print("Estado após rollback:", character.Crystals, character.PassiveTraits.Strength, character.PassiveTraits.Agility, character.PassiveTraits.Intelligence)
